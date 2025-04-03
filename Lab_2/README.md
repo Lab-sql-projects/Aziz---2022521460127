@@ -1,0 +1,67 @@
+# DreamScape Nexus - SQL Lab 2
+
+### 1. INNER JOIN
+Retrieves all dreams with their associated category information.
+```sql
+SELECT d.dream_id, d.dream_date, d.clarity_level, d.description,
+       dc.category_name, dc.description as category_description
+FROM Dreams d
+INNER JOIN DreamCategories dc ON d.category_id = dc.category_id
+ORDER BY d.dream_date DESC;
+```
+
+### 2. LEFT JOIN
+Gets all users and their dreams, including users who haven't recorded any dreams.
+```sql
+SELECT u.user_id, u.username, u.email, d.dream_id, d.dream_date, d.description
+FROM Users u
+LEFT JOIN Dreams d ON u.user_id = d.user_id
+ORDER BY u.username, d.dream_date;
+```
+
+### 3. UPDATE
+Increases the clarity level for lucid dreams.
+```sql
+UPDATE Dreams
+SET clarity_level = clarity_level + 1
+WHERE is_lucid = TRUE AND clarity_level < 10;
+```
+
+### 4. DELETE
+Removes dreams with low clarity that are older than 1 year.
+```sql
+DELETE FROM Dreams
+WHERE clarity_level < 3 
+  AND dream_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR);
+```
+
+### 5. AGGREGATION with GROUP BY and HAVING
+Finds users who have recorded multiple dreams with high clarity levels.
+```sql
+SELECT u.user_id, u.username, COUNT(d.dream_id) as dream_count,
+       AVG(d.clarity_level) as avg_clarity
+FROM Users u
+JOIN Dreams d ON u.user_id = d.user_id
+WHERE d.clarity_level > 5
+GROUP BY u.user_id, u.username
+HAVING COUNT(d.dream_id) > 1
+ORDER BY avg_clarity DESC;
+```
+
+### 6. SUBQUERY
+Identifies dreams that contain more symbols than the average.
+```sql
+SELECT d.dream_id, d.dream_date, d.description, COUNT(ds.symbol_id) as symbol_count
+FROM Dreams d
+JOIN DreamSymbols ds ON d.dream_id = ds.dream_id
+GROUP BY d.dream_id, d.dream_date, d.description
+HAVING COUNT(ds.symbol_id) > (
+    SELECT AVG(symbol_count) 
+    FROM (
+        SELECT dream_id, COUNT(symbol_id) as symbol_count
+        FROM DreamSymbols
+        GROUP BY dream_id
+    ) as avg_symbols
+)
+ORDER BY symbol_count DESC;
+```
