@@ -1,7 +1,9 @@
-# DreamScape Nexus - SQL Lab 2
+# DreamScape Nexus - SQL 2
 
 ## 1. INNER JOIN
+
 Find all dreams with their category names.
+
 ```sql
 SELECT d.dream_id, d.dream_date, d.clarity_level, d.description,
        dc.category_name, dc.description as category_description
@@ -11,7 +13,9 @@ ORDER BY d.dream_date DESC;
 ```
 
 ## 2. LEFT JOIN
+
 Get all users and their dreams, including users who haven't recorded any dreams.
+
 ```sql
 SELECT u.user_id, u.username, u.email, d.dream_id, d.dream_date, d.description
 FROM Users u
@@ -20,7 +24,9 @@ ORDER BY u.username, d.dream_date;
 ```
 
 ## 3. UPDATE
+
 Update clarity level for dreams that are marked as lucid.
+
 ```sql
 UPDATE Dreams
 SET clarity_level = clarity_level + 1
@@ -28,15 +34,19 @@ WHERE is_lucid = TRUE AND clarity_level < 10;
 ```
 
 ## 4. DELETE
+
 Remove dreams that have very low clarity and are older than 1 year.
+
 ```sql
 DELETE FROM Dreams
-WHERE clarity_level < 3 
+WHERE clarity_level < 3
   AND dream_date < DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR);
 ```
 
 ## 5. AGGREGATION with GROUP BY and HAVING
+
 Find users who have recorded more than 1 dream with high clarity levels.
+
 ```sql
 SELECT u.user_id, u.username, COUNT(d.dream_id) as dream_count,
        AVG(d.clarity_level) as avg_clarity
@@ -49,14 +59,16 @@ ORDER BY avg_clarity DESC;
 ```
 
 ## 6. SUBQUERY
+
 Find dreams that contain symbols that appear more frequently than the average symbol appearance count.
+
 ```sql
 SELECT d.dream_id, d.dream_date, d.description, COUNT(ds.symbol_id) as symbol_count
 FROM Dreams d
 JOIN DreamSymbols ds ON d.dream_id = ds.dream_id
 GROUP BY d.dream_id, d.dream_date, d.description
 HAVING COUNT(ds.symbol_id) > (
-    SELECT AVG(symbol_count) 
+    SELECT AVG(symbol_count)
     FROM (
         SELECT dream_id, COUNT(symbol_id) as symbol_count
         FROM DreamSymbols
